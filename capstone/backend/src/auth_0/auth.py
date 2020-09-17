@@ -1,6 +1,7 @@
 '''
     REFERENCES: Identity and Access Management section of Udacity Full stack nano degree program
 '''
+import os
 import json
 from flask import request, _request_ctx_stack
 from functools import wraps
@@ -8,9 +9,10 @@ from jose import jwt
 from urllib.request import urlopen
 
 
-AUTH0_DOMAIN = 'dev-uda-course.us.auth0.com'
-ALGORITHMS = ['RS256']
-API_AUDIENCE = 'capstone'
+
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
+ALGORITHMS= os.getenv('ALGORITHMS')
+API_AUDIENCE = os.getenv('API_AUDIENCE')
 
 ## AuthError Exception
 '''

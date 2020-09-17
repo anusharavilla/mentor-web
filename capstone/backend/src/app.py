@@ -3,26 +3,18 @@ import json
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from .database.models import setup_db, Student, Mentor, MentorCourse, MentorStudentPair, Feedback, RequestMessage, ReplyMessage, AdminMessage
+from database.models import setup_db, Student, Mentor, MentorCourse, MentorStudentPair, Feedback, RequestMessage, ReplyMessage, AdminMessage
 from sqlalchemy import exc, func
 
-from .auth.auth import AuthError, requires_auth
+from auth_0.auth import AuthError, requires_auth
 
-############ 5. Heroku .. finish complete delploying.. also figure out about database andd where to deploy it 
-
-############ 4. Migrations
-
-### UNTIL HERE TODAY
-
-########### need to do testing also
-
-############ 6. last document and submit  
 
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
   CORS(app)
+
   return app
 
 APP = create_app()

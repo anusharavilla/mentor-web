@@ -7,8 +7,7 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy_utils import aggregated
 import json
 
-database_name = "capstone"
-database_path = "postgres://{}/{}".format('anusharavilla:SriSha1234@localhost:5432', database_name) # TODO: Change here before testing
+database_path = os.getenv('DATABASE_URL')
 
 db = SQLAlchemy()
 
@@ -19,7 +18,6 @@ def setup_db(app, database_path=database_path):
     db.app = app
     db.init_app(app)
     db.create_all()
-
 
 '''
 Student
