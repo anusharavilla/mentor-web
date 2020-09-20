@@ -1,0 +1,3 @@
+###2. Make a dockerfile and containerize in docker and test locally
+###3. Change the databse to heroku
+###4. deploy in heroku using docker and everything 

@@ -90,6 +90,11 @@ def f_courses():
   except:
     abort(422)
 
+@APP.route('/', methods=['GET'])
+def f_working():
+  return jsonify ({
+        'success'  : True
+        })
 
 ####################STUDENT ENDPOINTS########################
 
