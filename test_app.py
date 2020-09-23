@@ -19,7 +19,7 @@ class CapstoneTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "capstone_test"
-        self.database_path = "postgresql://{}/{}".format('anusharavilla:SriSha1234@localhost:5432', self.database_name) # TODO: Change here before testing
+        self.database_path = "postgresql://{}/{}".format('username:password@localhost:5432', self.database_name) # TODO: Change here before testing
         setup_db(self.app, self.database_path, True)
 
         # binds the app to the current context
