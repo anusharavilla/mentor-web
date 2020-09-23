@@ -102,9 +102,8 @@ def create_app(test_config=None):
   
   @app.route('/student_access', methods=['POST'])
   @requires_auth('post:student')
-  def student_new_student(student_id):
-  
-    try:
+  def student_new_student(student_id): 
+    try:   
       input_request = request.get_json()
       if input_request is None:
         raise inputNotSpecifiedError
@@ -134,29 +133,39 @@ def create_app(test_config=None):
       abort(400)
     except:
       abort(422)
-  
+
   
   @app.route('/student_access', methods=['GET'])
   @requires_auth('read:student')
   def student_student_info(student_id):
+    print("line 1") 
     student_formatted = []
     previous_courses_formatted = []
     current_courses_formatted = []
-  
+    print("line 2") 
     try:
   
       student = Student.query.filter(Student.userid==student_id).first()
+      print("line 3") 
       if student!=None:
         student_formatted = student.format()
+        print("line 4") 
   
+      print("line 5") 
       previous_courses = MentorStudentPair.query.filter(MentorStudentPair.student_id==student_id, MentorStudentPair.present_student==False).all()
+      print("line 6") 
       if previous_courses!=None:
         previous_courses_formatted = [ previous_course.format() for previous_course in previous_courses ]
-  
+        print("line 7")
+
+      print("line 8") 
       current_courses = MentorStudentPair.query.filter(MentorStudentPair.student_id==student_id, MentorStudentPair.present_student==True).all()
+      print("line 9") 
       if current_courses!=None:
         current_courses_formatted = [ current_course.format() for current_course in current_courses ]
+        print("line 10") 
       
+      print("line 11") 
       return jsonify ({
           'success'          : True,
           'student'          : student_formatted,
