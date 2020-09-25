@@ -28,6 +28,7 @@ flask run --reload
 
 ## TEST SETUP
 Edit TEST_DB_PATH and TEST_DB_NAME in test_script.sh and run it to test locally.
+
 source test_script.sh
 
  
