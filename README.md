@@ -1,3 +1,8 @@
+## ABOUT THE APP
+Mentor-student-web is a platform for students to find part-time/full-time mentors in their city. Mentors can register themselves and add courses that they can teach along with the level at which they would like to teach the course. Students can search mentors using filters such as rating, qualification, street, city, state, tutoring fee, etc. The app also supports a student mentor messaging system through which students can send requests to mentors and mentors can accept potential students. Students can also choose to send feedbacks to the mentors that they are tutoring with. There is also support for an administrative role which can disable reported mentor/student accounts.  
+
+## MOTIVATION FOR THE APP
+I thought that it might be a good idea to connect students with part-time mentors or people willing to take some time off to tutor in the area. 
 
 ## WEBPAGE  
 The webpage is hosted at:  
@@ -91,8 +96,6 @@ Student endpoints are those that a user with role student can access.
                              Upon deletion of mentor, courses added by mentor and feedbacks to mentor are also deleted.  
 
 
-<<<NEEDS SOME THOUGHT>>>>
-## README.. about the app .. this you can do after some thought.. everthing else is manual so finish up quick.
 
 
 
@@ -103,6 +106,4 @@ Student endpoints are those that a user with role student can access.
 ## copy that JWT into setup.sh 
 ## remove my username and password
 ## git commit and submit
-
-
 ## IMPORTANT: change my laptop password  
