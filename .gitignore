@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 #environment
-capstone/capstone_env/
+capstone_env/
