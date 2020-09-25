@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import json
 from flask import Flask, request, abort, jsonify
@@ -64,13 +65,23 @@ class actionNotPermittedError(Error):
 
 
 def create_app(test_config=None):
+  
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
   CORS(app)
 
+
   ###################PUBLIC ENDPOINTS###########################
-  
+
+  '''
+  Endpoint: GET /courses
+        Description:         This method returns the list of all unique courses in the database
+        Permission:          no permission required.
+        Return Value:        Returns only the name and the grade for each course
+        Return data format:  Returns status code 200 and json {"success": True, "courses": courses} where courses is the list of courses 
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/courses', methods=['GET'])
   def f_courses():
     courses = []
@@ -92,6 +103,7 @@ def create_app(test_config=None):
     except:
       abort(422)
   
+  #Basic Public end point
   @app.route('/', methods=['GET'])
   def f_working():
     return jsonify ({
@@ -99,7 +111,15 @@ def create_app(test_config=None):
           })
   
   ####################STUDENT ENDPOINTS########################
-  
+
+
+  '''
+  Endpoint: POST /student_access
+        Description:         This method adds a new student with new information from user into the database, student_id is decoded from jwt
+        Permission:          'post:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/student_access', methods=['POST'])
   @requires_auth('post:student')
   def student_new_student(student_id): 
@@ -135,7 +155,17 @@ def create_app(test_config=None):
     except:
       abort(422)
 
-  
+
+  '''
+  Endpoint: GET /student_access
+        Description:         This method returns the student information based on the studetn id decoded from jwt
+        Permission:          'read:student' permission required.
+        Return Value:        Returns Student.format() which contains all inforamtion of student
+                             Courses that the student has completed previously as previous courses which is a list of MentorCourse.format()
+                             Courses that the student is currently enrolled in as current courses which is a list of MentorCourse.format()                              
+        Return data format:  Returns status code 200 and json {"success": True, "student": student, "current_courses": list, "previous_courses": list }  
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/student_access', methods=['GET'])
   @requires_auth('read:student')
   def student_student_info(student_id):
@@ -167,7 +197,13 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: PATCH /student_access
+        Description:         This method updates existing student with new information from user into the database, student_id is decoded from jwt
+        Permission:          'update:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/student_access', methods=['PATCH'])
   @requires_auth('update:student')
   def student_update_info(student_id):
@@ -200,7 +236,13 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: DELETE /student_access
+        Description:         This method deletes existing student from the database, student_id is decoded from jwt
+        Permission:          'delete:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/student_access', methods=['DELETE'])
   @requires_auth('delete:student')
   def student_delete_profile(student_id):
@@ -222,7 +264,15 @@ def create_app(test_config=None):
       abort(422)
   
   
-  
+  '''
+  Endpoint: POST /student_access/search_mentors
+        Description:         This method searches for a mentor with information from student, student_id is decoded from jwt. The mentor's city and state must match the information given by the student 
+                             in the form along with the course name the student inputs and also the grade.
+        Permission:          'read:student' permission required. 
+        Return Value:        The search output will include a list of mentors with the following mentor information: the mentor_id, time_available, grade, course name, course id.
+        Return data format:  Returns status code 200 and json {"success": True, "search_output":search_output}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/student_access/search_mentors', methods=['POST'])
   @requires_auth('read:student')
   def student_search_mentors(student_id):
@@ -256,7 +306,15 @@ def create_app(test_config=None):
     except:
       abort(422)
     
-  
+  '''
+  Endpoint: GET /student_access/mentors/<mentor_id>
+        Description:         This method returns the mentor information based on the mentor id decoded from request
+        Permission:          'read:student' permission required.
+        Return Value:        Returns Mentor.format_student() which contains all non-confidential information of mentor
+                             Courses that the mentor offers which is a list of MentorCourse.format()
+        Return data format:  Returns status code 200 and json {"success": True, "mentor_details": mentor, "courses": list }  
+                             or appropriate status code indicating reason for failure
+  '''  
   @app.route('/student_access/mentors/<mentor_id>',methods=['GET'])
   @requires_auth('read:student')
   def student_mentor_info(student_id,mentor_id):
@@ -268,7 +326,8 @@ def create_app(test_config=None):
       if mentor!=None:
         mentor_formatted = mentor.format_student()
       else:
-        raise resourceNotFoundError  
+        raise resourceNotFoundError
+          
       courses = MentorCourse.query.filter(MentorCourse.mentor_id==mentor_id).all()
       if len(courses)!=0:
         courses_formatted = [course.format() for course in courses]
@@ -283,7 +342,15 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+
+  '''
+  Endpoint: POST /student_access/feedback
+        Description:         This method adds a feedback from student to mentor into the database, student_id is decoded from jwt. Mentor_id, rating, feedback message are form inputs form Student.
+                             Feedback can only be given by students tutored by mentor. Also, there is a maximum limit of 2 feedbacks per student. 
+        Permission:          'post:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''    
   @app.route('/student_access/feedback', methods=['POST']) 
   @requires_auth('post:student')
   def student_feedback(student_id):
@@ -293,6 +360,10 @@ def create_app(test_config=None):
       if input_request is None:
         raise inputNotSpecifiedError
       
+      mentor_found = Mentor.query.filter(Mentor.userid==input_request['mentor_id']).one_or_none()
+      if mentor_found==None:
+        raise resourceNotFoundError
+
       can_give_feedback = MentorStudentPair.query.filter(MentorStudentPair.mentor_id==input_request['mentor_id'],MentorStudentPair.student_id==student_id).one_or_none()
       if can_give_feedback ==None:
         raise actionNotPermittedError 
@@ -315,6 +386,8 @@ def create_app(test_config=None):
   
     except inputNotSpecifiedError:
       abort(400)
+    except resourceNotFoundError:
+      abort(404)
     except actionNotPermittedError:
       abort(401)
     except exceededFeedbackLimitError:
@@ -323,7 +396,14 @@ def create_app(test_config=None):
       abort(422)
   
   
-  
+  '''
+  Endpoint: POST /student_access/request_message
+        Description:         This method adds a request message from student to mentor into the database, student_id is decoded from jwt.
+                             Mentor_id, course_id, message, needs_volunteer are form inputs from student.        
+        Permission:          'post:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/student_access/request_message', methods=['POST'])
   @requires_auth('post:student')
   def student_request_message(student_id):
@@ -332,6 +412,10 @@ def create_app(test_config=None):
       input_request = request.get_json()
       if input_request is None:
         raise inputNotSpecifiedError
+      
+      mentor_found = Mentor.query.filter(Mentor.userid==input_request['mentor_id']).one_or_none()
+      if mentor_found==None:
+        raise resourceNotFoundError  
   
       new_message = RequestMessage( 
                                      mentor_id=input_request['mentor_id'],
@@ -348,10 +432,19 @@ def create_app(test_config=None):
   
     except inputNotSpecifiedError:
       abort(400)
+    except resourceNotFoundError:
+      abort(404)
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: GET /student_access/reply_messages
+        Description:         This method returns the reply messages from mentor based on the student id decoded from jwt
+        Permission:          'read:student' permission required.
+        Return Value:        Returns a list of reply messages as ReplyMessage.format() which contains the message from mentor
+        Return data format:  Returns status code 200 and json {"success": True, "reply_messages": list }  
+                             or appropriate status code indicating reason for failure
+  '''    
   @app.route('/student_access/reply_messages',methods=['GET']) 
   @requires_auth('read:student')
   def student_reply_messages(student_id):
@@ -370,8 +463,13 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
-  
+  '''
+  Endpoint: POST /student_access/admin_message
+        Description:         This method adds a request message from student to admin into the database, student_id is decoded from jwt. Message is form input from student.        
+        Permission:          'post:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/student_access/admin_message', methods=['POST'])
   @requires_auth('post:student')
   def student_admin_message(student_id):
@@ -400,7 +498,14 @@ def create_app(test_config=None):
   
   
   ################MENTOR ENDPOINTS#############################
-  
+
+  '''
+  Endpoint: POST /mentor_access
+        Description:         This method adds a new mentor with new information from user into the database, mentor_id is decoded from jwt
+        Permission:          'post:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''  
   @app.route('/mentor_access', methods=['POST'])
   @requires_auth('post:mentor')
   def mentor_new_mentor(mentor_id):
@@ -439,7 +544,19 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: GET /mentor_access
+        Description:         This method returns the mentor information based on the mentor id decoded from jwt
+        Permission:          'read:mentor' permission required.
+        Return Value:        Returns Mentor.format() which contains all inforamtion of mentor
+                             Courses that the mentor offers which is a list of MentorCourse.format()
+                             Previous students that the mentor has tutored as previous_students which is a list of MentorStudentPair.format() which returns student_id, year of tutoring etc                            
+                             Current students that the mentor is tutoring as current_students which is a list of MentorStudentPair.format() which returns student id, year of tutoring etc 
+                             Feedbacks that the mentor has recived as a list of Feedback.format()
+                             Overall rating of the mentor calculated using return_rating method.                            
+        Return data format:  Returns status code 200 and json {"success": True, 'mentor_info' : mentor, "courses_offered": list, "previous_students": list, "current_students": list, "feedbacks": list, "rating":int }  
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/mentor_access', methods=['GET'])
   @requires_auth('read:mentor')
   def mentor_mentor_info(mentor_id):
@@ -487,7 +604,13 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: PATCH /mentor_access
+        Description:         This method updates existing mentor with new information from user into the database, mentor_id is decoded from jwt
+        Permission:          'update:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''  
   @app.route('/mentor_access', methods=['PATCH'])
   @requires_auth('update:mentor')
   def mentor_update_info(mentor_id):
@@ -524,7 +647,14 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: DELETE /mentor_access
+        Description:         This method deletes existing mentor from the database, mentor_id is decoded from jwt.
+                             Upon deletion of mentor, courses added by mentor and feedbacks to mentor are also deleted.
+        Permission:          'delete:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/mentor_access', methods=['DELETE'])
   @requires_auth('delete:mentor')
   def mentor_delete_profile(mentor_id):
@@ -545,7 +675,13 @@ def create_app(test_config=None):
     except:
       abort(422)  
   
-  
+  '''
+  Endpoint: POST /mentor_access/new_course
+        Description:         This method adds a new course with new information from mentor into the database, mentor_id is decoded from jwt
+        Permission:          'post:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''  
   @app.route('/mentor_access/new_course', methods=['POST'])
   @requires_auth('post:mentor')
   def mentor_new_course(mentor_id):
@@ -554,6 +690,10 @@ def create_app(test_config=None):
       input_request  = request.get_json()
       if input_request is None:
         raise inputNotSpecifiedError
+      
+      mentor_found = Mentor.query.filter(Mentor.userid==mentor_id).one_or_none()
+      if mentor_found==None:
+        raise resourceNotFoundError  
 
       new_course = MentorCourse(
                                mentor_id = mentor_id,
@@ -568,9 +708,19 @@ def create_app(test_config=None):
   
     except inputNotSpecifiedError:
       abort(400)
+    except resourceNotFoundError:
+      abort(404)
     except:
       abort(422)  
-  
+
+  '''
+  Endpoint: DELETE /mentor_access/delete_course/<course_id>
+        Description:         This method deletes existing course from the database, mentor_id is decoded from jwt, course id is expected as input from form.
+                             Deletion of course can only be performed by the mentor who added the course. 
+        Permission:          'delete:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/mentor_access/delete_course/<course_id>', methods=['DELETE'])
   @requires_auth('delete:mentor')
   def mentor_delete_course(mentor_id,course_id):
@@ -592,7 +742,14 @@ def create_app(test_config=None):
       abort(422)  
   
   
-  
+  '''
+  Endpoint: GET /mentor_access/students/<student_id>
+        Description:         This method returns the student information based on the student id decoded from input request
+        Permission:          'read:mentor' permission required.
+        Return Value:        Returns Student.format_mentor() which contains all non-confidential information of student
+        Return data format:  Returns status code 200 and json {"success": True, "student_details": student }  
+                             or appropriate status code indicating reason for failure
+  '''  
   @app.route('/mentor_access/students/<student_id>', methods=['GET'])
   @requires_auth('read:mentor')
   def mentor_student_info(mentor_id,student_id):
@@ -602,16 +759,28 @@ def create_app(test_config=None):
       student = Student.query.filter(Student.userid==student_id).first()
       if student!=None:
         student_formatted = student.format_mentor()
+      else:
+        raise resourceNotFoundError
     
       return jsonify({
         'success' : True,
         'student_details': student_formatted
         })
-  
+    
+    except resourceNotFoundError:
+      abort(404)
     except:
       abort(422)
   
-   
+
+  '''
+  Endpoint: POST /mentor_access/accept_student
+        Description:         This method adds a new entry into MentorStudentPair in the database indicating that the metor has accepted to tutor the student
+                             Mentor_id is decoded from jwt. Student_id, course_id, mentorship_year, present_student inputs are recived from input request.
+        Permission:          'post:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''     
   @app.route('/mentor_access/accept_student', methods=['POST'])
   @requires_auth('post:mentor')
   def mentor_accept_student(mentor_id):
@@ -620,6 +789,10 @@ def create_app(test_config=None):
       input_request = request.get_json()
       if input_request is None:
         raise inputNotSpecifiedError
+
+      student = Student.query.filter(Student.userid==input_request['student_id']).first()
+      if student==None:
+        raise resourceNotFoundError
       
       new_student = MentorStudentPair( 
                                        mentorship_year= "mentorship_year",
@@ -636,10 +809,19 @@ def create_app(test_config=None):
   
     except inputNotSpecifiedError:
       abort(400)
+    except resourceNotFoundError:
+      abort(404)
     except:
       abort(422)  
   
-  
+  '''
+  Endpoint: PATCH /mentor_access/accepted_student_update
+        Description:         This method updates an existing entry in MentorStudentPair in the database which indicating that the metor has accepted to tutor the student
+                             Mentor_id is decoded from jwt. Student_id, course_id, mentorship_year, present_student inputs are recived from input request.
+        Permission:          'update:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''    
   @app.route('/mentor_access/accepted_student_update', methods=['PATCH'])
   @requires_auth('update:mentor')
   def mentor_update_student(mentor_id):
@@ -674,6 +856,14 @@ def create_app(test_config=None):
       abort(422)  
   
   
+  '''
+  Endpoint: GET /student_access/request_messages
+        Description:         This method returns the request messages from students based on the mentor id decoded from jwt
+        Permission:          'read:mentor' permission required.
+        Return Value:        Returns a list of request messages as RequestMessage.format() which contains the messages from students. It returns in descending order of req message id.
+        Return data format:  Returns status code 200 and json {"success": True, "request_messages": list }  
+                             or appropriate status code indicating reason for failure
+  '''    
   @app.route('/mentor_access/request_messages', methods=['GET'])
   @requires_auth('read:mentor')
   def mentor_request_messages(mentor_id):
@@ -692,8 +882,15 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
-  
+
+  '''
+  Endpoint: POST /student_access/reply_message
+        Description:         This method adds a reply message from mentor to student into the database, mentor_id is decoded from jwt.
+                             Student_id, course_id, message, needs_volunteer are form inputs from mentor.        
+        Permission:          'post:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/mentor_access/reply_message', methods=['POST'])
   @requires_auth('post:mentor')
   def mentor_reply_message(mentor_id):
@@ -702,7 +899,11 @@ def create_app(test_config=None):
       input_request = request.get_json()
       if input_request is None:
         raise inputNotSpecifiedError
-  
+    
+      student = Student.query.filter(Student.userid==input_request['student_id']).first()
+      if student==None:
+        raise resourceNotFoundError
+
       new_message = ReplyMessage( 
                                   mentor_id=mentor_id,
                                   student_id=input_request['student_id'],
@@ -718,10 +919,18 @@ def create_app(test_config=None):
   
     except inputNotSpecifiedError:
       abort(400)
+    except resourceNotFoundError:
+      abort(404)
     except:
       abort(422)  
   
-  
+  '''
+  Endpoint: POST /mentor_access/admin_message
+        Description:         This method adds a request message from mentor to admin into the database, mentor_id is decoded from jwt. Message is form input from mentor.        
+        Permission:          'post:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/mentor_access/admin_message', methods=['POST']) 
   @requires_auth('post:mentor')
   def mentor_admin_message(mentor_id):
@@ -749,7 +958,15 @@ def create_app(test_config=None):
   
   
   ################ADMIN ENDPOINTS###############################
-  
+
+  '''
+  Endpoint: GET /admin_access/students
+        Description:         This method returns the list of students in the database
+        Permission:          'read:admin' permission required.
+        Return Value:        Returns list of all students as students.format() which contains all student information
+        Return data format:  Returns status code 200 and json {"success": True, "students": list} where students is the list of students
+                             or appropriate status code indicating reason for failure
+  '''   
   @app.route('/admin_access/students', methods=['GET'])
   @requires_auth('read:admin')
   def f_students(admin_id):
@@ -768,6 +985,14 @@ def create_app(test_config=None):
     except:
       abort(422)
   
+  '''
+  Endpoint: GET /admin_access/mentors
+        Description:         This method returns the list of mentors in the database
+        Permission:          'read:admin' permission required.
+        Return Value:        Returns list of all mentors as mentor.format() which contains all mentor information
+        Return data format:  Returns status code 200 and json {"success": True, "mentors": list} where mentors is the list of mentors
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/admin_access/mentors', methods=['GET'])
   @requires_auth('read:admin')
   def f_mentors(admin_id):
@@ -786,7 +1011,14 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: GET /admin_access/view_messages
+        Description:         This method returns the admin messages from mentors and students students
+        Permission:          'read:admin' permission required.
+        Return Value:        Returns a list of admin messages as AdminMessage.format() which contains the messages from students and mentors
+        Return data format:  Returns status code 200 and json {"success": True, "request_messages": list }  
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/admin_access/view_messages', methods=['GET'])
   @requires_auth('read:admin')
   def admin_view_messages(admin_id):
@@ -805,7 +1037,13 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: DELETE /admin_access/students/<student_id>
+        Description:         This method deletes existing student from the database.
+        Permission:          'delete:student' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/admin_access/students/<student_id>', methods=['DELETE'])
   @requires_auth('delete:student')
   def admin_student_delete(admin_id,student_id):
@@ -826,7 +1064,14 @@ def create_app(test_config=None):
     except:
       abort(422)
   
-  
+  '''
+  Endpoint: DELETE /admin_access/mentors/<mentor_id>
+        Description:         This method deletes existing mentor from the database.
+                             Upon deletion of mentor, courses added by mentor and feedbacks to mentor are also deleted.
+        Permission:          'delete:mentor' permission required. 
+        Return data format:  Returns status code 200 and json {"success": True}
+                             or appropriate status code indicating reason for failure
+  ''' 
   @app.route('/admin_access/mentors/<mentor_id>', methods=['DELETE'])
   @requires_auth('delete:mentor')
   def admin_mentor_delete(admin_id,mentor_id):

@@ -143,7 +143,10 @@ def check_permissions(permission, payload):
 
     return True
 
-
+'''
+   extracting the user name from payload: username is needed to uniquely identify the user
+   Also, the username is specific to the app. It makes good primary key
+'''
 def get_user_identity(payload):
     if 'https://anusha.example.com/username' not in payload:
         raise AuthError({

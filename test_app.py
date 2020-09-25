@@ -6,11 +6,18 @@ from flask_sqlalchemy import SQLAlchemy
 from app import create_app
 from database.models import setup_db, Student, Mentor, MentorCourse, MentorStudentPair, Feedback, RequestMessage, ReplyMessage, AdminMessage
 
+
+
+"""
+Extracting JWT and LOcal database path stored in config file for testing
+"""
 JWT_STUDENT = os.getenv('JWT_STUDENT')
 JWT_MENTOR = os.getenv('JWT_MENTOR')
 JWT_ADMIN = os.getenv('JWT_ADMIN')
+TEST_DB_NAME = os.getenv('TEST_DB_NAME')
+TEST_DB_PATH=os.getenv('TEST_DB_PATH')
 
-### Testing will bw done locally.. take your jwt and do this 
+
 class CapstoneTestCase(unittest.TestCase):
     """This class represents the capstone test case"""
 
@@ -18,8 +25,8 @@ class CapstoneTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "capstone_test"
-        self.database_path = "postgresql://{}/{}".format('username:password@localhost:5432', self.database_name) # TODO: Change here before testing
+        self.database_name = TEST_DB_NAME
+        self.database_path = "postgresql://{}/{}".format(TEST_DB_PATH, self.database_name)
         setup_db(self.app, self.database_path, True)
 
         # binds the app to the current context
@@ -540,7 +547,7 @@ class CapstoneTestCase(unittest.TestCase):
 
     def test33_200_get_student_access_mentors(self):
         res = self.client().get(
-                                '/student_access/mentors/arrrrav',
+                                '/student_access/mentors/mentor_1',
                                 headers = [
                                            ('Authorization', f'Bearer {JWT_STUDENT}')
                                    ]
@@ -573,7 +580,7 @@ class CapstoneTestCase(unittest.TestCase):
                                            ('Content-Type', 'application/json')
                                    ],
                                 json = {
-                                          "mentor_id": "arrrrav",
+                                          "mentor_id": "mentor_1",
                                           "course_id": 1,
                                           "message": "request Message to mentor",
                                           "needs_volunteer": False
@@ -592,7 +599,7 @@ class CapstoneTestCase(unittest.TestCase):
                                            ('Content-Type', 'application/json')
                                    ],
                                 json = {
-                                          "mentor_id": "arrrrav",
+                                          "mentor_id": "mentor_1",
                                           "course_id": 1,
                                           "message": "request Message to mentor",
                                           "needs_volunteer": False
@@ -633,7 +640,7 @@ class CapstoneTestCase(unittest.TestCase):
                                            ('Content-Type', 'application/json')
                                    ],
                                 json = {
-                                          "mentor_id": "arrrrav",
+                                          "mentor_id": "mentor_1",
                                           "message": "feedback Message 1",
                                           "rating": 4
                                        } 
@@ -778,7 +785,7 @@ class CapstoneTestCase(unittest.TestCase):
     
     def test51_200_delete_admin_access_mentors(self):
         res = self.client().delete(
-                                '/admin_access/mentors/arrrrav',
+                                '/admin_access/mentors/mentor_1',
                                 headers = [
                                            ('Authorization', f'Bearer {JWT_ADMIN}')
                                    ]
@@ -791,7 +798,7 @@ class CapstoneTestCase(unittest.TestCase):
 
     def test52_405_delete_admin_access_mentors(self):
         res = self.client().get(
-                                '/admin_access/mentors/arrrrav',
+                                '/admin_access/mentors/mentor_1',
                                 headers = [
                                            ('Authorization', f'Bearer {JWT_STUDENT}')
                                    ]

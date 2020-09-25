@@ -15,7 +15,7 @@ Alternatively, you can use the following URL to create a new account:
 https://dev-uda-course.us.auth0.com/authorize?audience=capstone&response_type=token&client_id=Ve7fHhfDb8vqINZ2X16B9ZGeJJuMo5P1&redirect_uri=https://mentor-student-web.herokuapp.com/courses  
 Please wait upto 24 hours to get permissions (assign roles) 
 
-The signin page requires a username, email id, password and role:mentor/student/admin
+The signin page requires a username, email id, password and role:mentor/student/admin.
 
 ## ENDPOINTS INFO
 The following is a brief description of the end points. Please refer to app.py or `setup_instructions/README.md` for detailed description of the endpoints.
@@ -102,8 +102,7 @@ Student endpoints are those that a user with role student can access.
 
 <<<<<BEFORE SUBMITTING>>>>>>>>>>
 ## run tests and make sure things are working
-## go to auth0 and set your JWT to maxtiming 
-## copy that JWT into setup.sh 
+
 ## remove my username and password
 ## git commit and submit
 ## IMPORTANT: change my laptop password  
