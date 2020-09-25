@@ -1,9 +1,9 @@
 
-##WEBPAGE
+## WEBPAGE  
 The webpage is hosted at:  
 https://mentor-student-web.herokuapp.com/  
 
-##Instructions to setup authentication
+## Instructions to setup authentication
 You can find the JWTs for a student, mentor and Admin in `setup.sh`  
 
 Alternatively, you can use the following URL to create a new account:  
@@ -12,14 +12,14 @@ Please wait upto 24 hours to get permissions (assign roles)
 
 The signin page requires a username, email id, password and role:mentor/student/admin
 
-##ENDPOINTS INFO
+## ENDPOINTS INFO
 The following is a brief description of the end points. Please refer to app.py or `setup_instructions/README.md` for detailed description of the endpoints.
 
-###PUBLIC ENDPOINTS
+### PUBLIC ENDPOINTS
 1.  Endpoint: GET /courses  
         Description:         This method returns the list of all unique courses in the database  
 
-###STUDENT ENDPOINTS
+### STUDENT ENDPOINTS
 Student endpoints are those that a user with role student can access.  
 
 1. POST /student_access  

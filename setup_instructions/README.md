@@ -55,7 +55,7 @@ source test_script.sh
 
 ## ENDPOINTS IN DETAIL
 
-###PUBLIC ENDPOINTS
+### PUBLIC ENDPOINTS
 1.  Endpoint: GET /courses  
         Description:         This method returns the list of all unique courses in the database  
         Permission:          no permission required.  
