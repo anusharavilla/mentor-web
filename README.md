@@ -95,14 +95,3 @@ Student endpoints are those that a user with role student can access.
         Description:         This method deletes existing mentor from the database.  
                              Upon deletion of mentor, courses added by mentor and feedbacks to mentor are also deleted.  
 
-
-
-
-
-
-<<<<<BEFORE SUBMITTING>>>>>>>>>>
-## run tests and make sure things are working
-
-## remove my username and password
-## git commit and submit
-## IMPORTANT: change my laptop password  
